@@ -182,9 +182,9 @@ export const MenuView: React.FC<MenuProps> = ({ cart, onAddToCart, onRemoveFromC
         
         {/* Cart Floating Bar */}
         {cart.length > 0 && (
-            <div className="absolute bottom-5 left-4 right-4 z-30 animate-in slide-in-from-bottom-4 fade-in duration-300">
+            <div className="absolute bottom-20 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300">
                <div className="bg-gray-900 text-white rounded-full p-2 pr-2 shadow-2xl flex items-center justify-between h-14">
-                  <div className="flex items-center gap-3 flex-1" onClick={onCheckout}>
+                  <div className="flex items-center gap-3 flex-1 cursor-pointer" onClick={onCheckout}>
                       <div className="relative -ml-1">
                           <div className="w-12 h-12 bg-[#333] rounded-full flex items-center justify-center border-4 border-[#F3F4F6] shadow-md relative z-10">
                              <ShoppingCart size={20} className="text-white" />
