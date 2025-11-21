@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { ChevronLeft, Search, MapPin, Navigation } from 'lucide-react';
+import { ChevronLeft, Search, MapPin, Navigation, X } from 'lucide-react';
 import { Store } from '../types';
 import { api } from '../services/api';
 
@@ -17,7 +17,11 @@ export const StoreListView: React.FC<StoreListProps> = ({ onBack, onSelect }) =>
     api.getStores().then(setStores);
   }, []);
 
-  const filteredStores = stores.filter(s => s.name.includes(searchTerm) || s.address.includes(searchTerm));
+  // Case-insensitive filtering for name and address
+  const filteredStores = stores.filter(s => 
+    s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    s.address.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-[#F3F4F6] flex flex-col">
@@ -33,30 +37,41 @@ export const StoreListView: React.FC<StoreListProps> = ({ onBack, onSelect }) =>
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 
               type="text" 
-              placeholder="搜索门店" 
+              placeholder="搜索门店名称或地址" 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-gray-100 rounded-full py-2 pl-9 pr-4 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]/50"
+              className="w-full bg-gray-100 rounded-full py-2 pl-9 pr-9 text-sm outline-none focus:ring-2 focus:ring-[#FDE047]/50 transition-all placeholder:text-gray-400"
             />
+            {searchTerm && (
+                <button 
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 bg-gray-200 rounded-full text-gray-500 hover:bg-gray-300 transition-colors"
+                >
+                    <X size={10} />
+                </button>
+            )}
          </div>
       </div>
 
       {/* Map Placeholder */}
       <div className="h-48 bg-gray-200 flex items-center justify-center relative overflow-hidden">
          <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(#999 1px, transparent 1px)', backgroundSize: '10px 10px'}}></div>
-         <button className="bg-white px-4 py-2 rounded-full shadow-md flex items-center gap-2 text-sm font-bold text-gray-800 z-10">
+         <button className="bg-white px-4 py-2 rounded-full shadow-md flex items-center gap-2 text-sm font-bold text-gray-800 z-10 hover:scale-105 transition-transform active:scale-95">
             <MapPin size={16} /> 查看地图模式
          </button>
       </div>
 
       {/* List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-         <div className="text-xs text-gray-500 font-medium ml-1">附近门店</div>
-         {filteredStores.map(store => (
+         <div className="text-xs text-gray-500 font-medium ml-1">
+            {searchTerm ? `搜索结果 (${filteredStores.length})` : '附近门店'}
+         </div>
+         
+         {filteredStores.length > 0 ? filteredStores.map(store => (
             <div 
               key={store.id} 
               onClick={() => onSelect(store)}
-              className={`bg-white p-4 rounded-xl shadow-sm border-2 transition-all ${store.status === 'OPEN' ? 'border-transparent hover:border-[#FDE047]' : 'border-transparent opacity-70 grayscale'}`}
+              className={`bg-white p-4 rounded-xl shadow-sm border-2 transition-all cursor-pointer ${store.status === 'OPEN' ? 'border-transparent hover:border-[#FDE047]' : 'border-transparent opacity-70 grayscale'}`}
             >
                 <div className="flex gap-3">
                     <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
@@ -80,12 +95,24 @@ export const StoreListView: React.FC<StoreListProps> = ({ onBack, onSelect }) =>
                 </div>
                 <div className="mt-3 pt-3 border-t border-gray-50 flex justify-between items-center">
                    <div className="flex gap-4">
-                      <button className="text-xs font-medium text-gray-600 flex items-center gap-1"><Navigation size={12} /> 导航</button>
+                      <button 
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-xs font-medium text-gray-600 flex items-center gap-1 hover:text-gray-900"
+                      >
+                          <Navigation size={12} /> 导航
+                      </button>
                    </div>
-                   <button className="bg-[#FDE047] text-gray-900 text-xs font-bold px-4 py-1.5 rounded-full">去点单</button>
+                   <button className="bg-[#FDE047] text-gray-900 text-xs font-bold px-4 py-1.5 rounded-full hover:bg-yellow-400 transition-colors">去点单</button>
                 </div>
             </div>
-         ))}
+         )) : (
+             <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                    <Search size={24} className="text-gray-300" />
+                 </div>
+                 <span className="text-sm">未找到相关门店</span>
+             </div>
+         )}
       </div>
     </div>
   );

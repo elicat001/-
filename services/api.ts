@@ -157,7 +157,11 @@ let MOCK_PRODUCTS: Product[] = [
     image: 'https://images.unsplash.com/photo-1621236378699-8597fab6a551?w=400',
     description: '经典德式风味，口感韧劲十足。',
     sales: 85,
-    status: 1
+    status: 1,
+    specs: [
+        { name: '尺寸', options: ['常规', '大份'] },
+        { name: '选项', options: ['标准', '无麸质'] }
+    ]
   },
   {
     id: 302,

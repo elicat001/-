@@ -26,12 +26,13 @@ const App: React.FC = () => {
   const [selectedReward, setSelectedReward] = useState<PointsReward | null>(null);
   const [initialDiningMode, setInitialDiningMode] = useState<'dine-in' | 'pickup' | 'delivery'>('dine-in');
 
-  const handleAddToCart = (product: Product, quantity: number, selectedSpec?: Record<string, string>) => {
+  const handleAddToCart = (product: Product, quantity: number, selectedSpec?: Record<string, string>, notes?: string) => {
     setCart(prev => {
-      // Check if same product AND same specs exists
+      // Check if same product AND same specs AND same notes exists
       const existingIndex = prev.findIndex(item => 
         item.id === product.id && 
-        JSON.stringify(item.selectedSpec) === JSON.stringify(selectedSpec)
+        JSON.stringify(item.selectedSpec) === JSON.stringify(selectedSpec) &&
+        (item.notes || '') === (notes || '')
       );
 
       if (existingIndex > -1) {
@@ -39,7 +40,7 @@ const App: React.FC = () => {
         newCart[existingIndex].quantity += quantity;
         return newCart;
       }
-      return [...prev, { ...product, quantity, selectedSpec }];
+      return [...prev, { ...product, quantity, selectedSpec, notes }];
     });
   };
 

@@ -82,6 +82,7 @@ export interface Category {
 export interface CartItem extends Product {
   quantity: number;
   selectedSpec?: Record<string, string>; 
+  notes?: string;
 }
 
 export enum OrderStatus {
