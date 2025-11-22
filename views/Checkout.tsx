@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, MoreHorizontal, ChevronRight, Check, Wallet, X, Ticket } from 'lucide-react';
 import { CartItem, Coupon } from '../types';
@@ -15,6 +16,7 @@ export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDin
   const [paymentMethod, setPaymentMethod] = useState<'wechat' | 'balance'>('wechat');
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [createdOrderId, setCreatedOrderId] = useState<string>('');
   
   // Coupon state
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -28,6 +30,9 @@ export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDin
   // Calculate discount
   const discountAmount = selectedCoupon ? selectedCoupon.amount : 0;
   const finalTotal = Math.max(0, cartTotal - discountAmount);
+  // Delivery fee logic (simplified for demo)
+  const deliveryFee = diningMode === 'delivery' ? 0 : 0;
+  const grandTotal = finalTotal + deliveryFee;
 
   const handlePay = async () => {
       setIsPaymentProcessing(true);
@@ -39,6 +44,7 @@ export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDin
       });
       await api.payOrder(orderId);
       
+      setCreatedOrderId(orderId);
       setIsPaymentProcessing(false);
       setShowSuccessModal(true);
   };
@@ -197,14 +203,14 @@ export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDin
                 {diningMode === 'delivery' && (
                    <div className="flex justify-between items-center py-3 border-t border-dashed border-gray-100">
                       <span className="text-sm text-gray-600">配送费</span>
-                      <span className="text-sm text-gray-900 font-bold">¥0.00</span>
+                      <span className="text-sm text-gray-900 font-bold">¥{deliveryFee.toFixed(2)}</span>
                    </div>
                 )}
 
                 <div className="flex justify-end pt-4 border-t border-gray-50 items-baseline gap-2">
                   <span className="text-xs text-gray-500">已优惠 ¥{discountAmount.toFixed(2)}</span>
                   <span className="text-sm text-gray-900 font-medium">小计</span>
-                  <span className="font-bold text-xl text-gray-900">¥{finalTotal.toFixed(2)}</span>
+                  <span className="font-bold text-xl text-gray-900">¥{grandTotal.toFixed(2)}</span>
                 </div>
             </div>
 
@@ -262,6 +268,22 @@ export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDin
                 </div>
             </div>
           </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className="bg-white border-t border-gray-100 px-4 py-3 pb-safe sticky bottom-0 z-20 flex items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+         <div className="flex items-baseline gap-1">
+             <span className="text-sm font-medium text-gray-900">合计</span>
+             <span className="text-2xl font-bold text-gray-900">¥{grandTotal.toFixed(2)}</span>
+             {discountAmount > 0 && <span className="text-xs text-gray-400 line-through ml-1">¥{(grandTotal + discountAmount).toFixed(2)}</span>}
+         </div>
+         <button 
+            onClick={handlePay}
+            disabled={isPaymentProcessing}
+            className={`bg-[#FDE047] text-gray-900 px-8 py-3 rounded-full font-bold text-sm shadow-sm transition-all active:scale-[0.98] ${isPaymentProcessing ? 'opacity-70 cursor-wait' : 'hover:bg-yellow-400'}`}
+         >
+            {isPaymentProcessing ? '支付中...' : '确认支付'}
+         </button>
       </div>
 
       {/* Coupon Selection Modal */}
@@ -345,20 +367,42 @@ export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDin
       {/* Success Payment Modal */}
       {showSuccessModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-              <div className="bg-white w-full max-w-sm rounded-2xl p-8 flex flex-col items-center animate-in zoom-in duration-200 shadow-2xl">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 text-[#059669]">
-                      <Check size={32} strokeWidth={4} />
+              <div className="bg-white w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in duration-200 flex flex-col">
+                  <div className="bg-green-50 p-6 flex flex-col items-center justify-center border-b border-green-100">
+                      <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-3 text-[#059669]">
+                          <Check size={28} strokeWidth={4} />
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900">支付成功</h3>
+                      <p className="text-green-700 text-xs mt-1">商家已接单，正在制作中</p>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">支付成功</h3>
-                  <p className="text-gray-500 text-sm text-center mb-8">
-                      商家已接单，正在为您准备制作
-                  </p>
-                  <button 
-                     onClick={handleFinish}
-                     className="w-full bg-[#FDE047] text-gray-900 font-bold py-3.5 rounded-xl hover:bg-yellow-400 transition-colors"
-                  >
-                      完成
-                  </button>
+                  
+                  <div className="p-6 space-y-4">
+                      <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                          <span className="text-sm text-gray-500">支付金额</span>
+                          <span className="text-xl font-bold text-gray-900">¥{grandTotal.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1">
+                          <span className="text-xs text-gray-500">订单编号</span>
+                          <span className="text-xs font-mono text-gray-700">{createdOrderId || 'OD28371029'}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1">
+                          <span className="text-xs text-gray-500">支付方式</span>
+                          <span className="text-xs text-gray-700">{paymentMethod === 'wechat' ? '微信支付' : '余额支付'}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1">
+                          <span className="text-xs text-gray-500">下单时间</span>
+                          <span className="text-xs text-gray-700">{new Date().toLocaleString('zh-CN', {hour12:false})}</span>
+                      </div>
+                  </div>
+
+                  <div className="p-6 pt-0">
+                      <button 
+                         onClick={handleFinish}
+                         className="w-full bg-[#FDE047] text-gray-900 font-bold py-3.5 rounded-xl hover:bg-yellow-400 transition-colors shadow-sm"
+                      >
+                          查看订单
+                      </button>
+                  </div>
               </div>
           </div>
       )}

@@ -203,19 +203,28 @@ export const MenuView: React.FC<MenuProps> = ({ cart, onAddToCart, onRemoveFromC
                             ))}
                           </div>
                        </div>
+                       
+                       {/* Price Section */}
                        <div className="flex items-end justify-between mt-2">
                           <div>
-                             <div className="flex items-baseline gap-1">
-                                <span className="text-base font-bold text-gray-900">¥{product.price}</span>
-                                {product.originalPrice && <span className="text-[10px] text-gray-300 line-through">¥{product.originalPrice}</span>}
-                             </div>
-                             {product.isVip && (
-                               <div className="flex items-center gap-1 mt-0.5">
-                                 <span className="bg-gray-900 text-[#FDE047] text-[9px] px-1 rounded-sm font-bold tracking-tighter">VIP</span>
-                                 <span className="text-xs text-[#FDE047] font-bold drop-shadow-[0_1px_0_rgba(0,0,0,0.2)]" style={{ textShadow: '0 1px 1px rgba(0,0,0,0.1)' }}>¥{product.vipPrice}</span>
-                               </div>
+                             {product.isVip ? (
+                                <div className="flex flex-col items-start">
+                                    <div className="flex items-center gap-1">
+                                        <div className="bg-[#1F2937] text-[#FDE047] text-[9px] px-1.5 py-0.5 rounded-[4px] flex items-center leading-none font-bold shadow-sm">
+                                            <span className="mr-0.5 opacity-80 text-[8px]">VIP</span>
+                                            <span>¥{product.vipPrice}</span>
+                                        </div>
+                                    </div>
+                                    <span className="text-[10px] text-gray-400 mt-0.5 line-through decoration-gray-300">¥{product.price}</span>
+                                </div>
+                             ) : (
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-base font-bold text-gray-900">¥{product.price}</span>
+                                    {product.originalPrice && <span className="text-[10px] text-gray-300 line-through">¥{product.originalPrice}</span>}
+                                </div>
                              )}
                           </div>
+                          
                           <button 
                             onClick={(e) => handleDirectAdd(e, product)}
                             className={`h-6 flex items-center justify-center transition-all active:scale-95 ${
@@ -240,29 +249,39 @@ export const MenuView: React.FC<MenuProps> = ({ cart, onAddToCart, onRemoveFromC
         </div>
         
         {/* Cart Floating Bar */}
-        {cart.length > 0 && (
-            <div className="absolute bottom-20 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300">
-               <div className="bg-gray-900 text-white rounded-full p-2 pr-2 shadow-2xl flex items-center justify-between h-14">
-                  <div className="flex items-center gap-3 flex-1 cursor-pointer" onClick={onCheckout}>
-                      <div className="relative -ml-1">
-                          <div className="w-12 h-12 bg-[#333] rounded-full flex items-center justify-center border-4 border-[#F3F4F6] shadow-md relative z-10">
-                             <ShoppingCart size={20} className="text-white" />
-                          </div>
-                          <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#333] z-20">
-                             {cartCount}
-                          </div>
+        <div className="absolute bottom-20 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300">
+           <div className={`rounded-full p-2 pr-2 shadow-2xl flex items-center justify-between h-14 transition-colors ${cart.length > 0 ? 'bg-gray-900 text-white' : 'bg-black/80 text-gray-400'}`}>
+              <div className="flex items-center gap-3 flex-1 cursor-pointer" onClick={cart.length > 0 ? onCheckout : undefined}>
+                  <div className="relative -ml-1">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center border-4 shadow-md relative z-10 transition-colors ${cart.length > 0 ? 'bg-[#333] border-[#F3F4F6]' : 'bg-[#222] border-[#444]'}`}>
+                         <ShoppingCart size={20} className={cart.length > 0 ? "text-white" : "text-gray-500"} />
                       </div>
-                      <div className="flex flex-col">
-                         <span className="text-lg font-bold leading-none">¥{cartTotal.toFixed(2)}</span>
-                         <span className="text-[10px] text-gray-400 line-through mt-0.5">预估 ¥{(cartTotal * 1.2).toFixed(2)}</span>
-                      </div>
+                      {cartCount > 0 && (
+                        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#333] z-20">
+                            {cartCount}
+                        </div>
+                      )}
                   </div>
-                  <button onClick={onCheckout} className="bg-[#FDE047] text-gray-900 px-8 h-10 rounded-full font-bold text-sm hover:bg-yellow-300 transition-colors shadow-sm">
-                     去结算
-                  </button>
-               </div>
-            </div>
-        )}
+                  <div className="flex flex-col">
+                     {cart.length > 0 ? (
+                        <>
+                            <span className="text-lg font-bold leading-none">¥{cartTotal.toFixed(2)}</span>
+                            <span className="text-[10px] text-gray-400 line-through mt-0.5">预估 ¥{(cartTotal * 1.2).toFixed(2)}</span>
+                        </>
+                     ) : (
+                        <span className="text-sm font-bold">未选购商品</span>
+                     )}
+                  </div>
+              </div>
+              <button 
+                onClick={onCheckout} 
+                disabled={cart.length === 0}
+                className={`px-8 h-10 rounded-full font-bold text-sm transition-colors shadow-sm ${cart.length > 0 ? 'bg-[#FDE047] text-gray-900 hover:bg-yellow-300' : 'bg-gray-700 text-gray-500 cursor-not-allowed'}`}
+              >
+                 {cart.length > 0 ? '去结算' : '¥0起送'}
+              </button>
+           </div>
+        </div>
       </div>
 
       {/* Product Modal */}
@@ -317,10 +336,21 @@ export const MenuView: React.FC<MenuProps> = ({ cart, onAddToCart, onRemoveFromC
                {/* Bottom Bar */}
                <div className="p-4 border-t border-gray-100 bg-gray-50/80 backdrop-blur-sm flex justify-between items-center pb-8">
                    <div className="flex flex-col">
-                      <div className="flex items-baseline gap-1">
-                         <span className="text-2xl font-bold text-gray-900">¥{(selectedProduct.price * modalQuantity).toFixed(2)}</span>
-                      </div>
-                      {selectedProduct.isVip && <span className="text-[10px] text-[#B45309] font-bold">VIP ¥{(selectedProduct.vipPrice! * modalQuantity).toFixed(2)}</span>}
+                      {selectedProduct.isVip ? (
+                          <>
+                            <div className="flex items-center gap-1">
+                                <div className="bg-[#1F2937] text-[#FDE047] text-xs px-1.5 py-0.5 rounded-[4px] font-bold flex items-center">
+                                    <span className="mr-1 opacity-80 text-[10px]">VIP</span>
+                                    <span>¥{(selectedProduct.vipPrice! * modalQuantity).toFixed(2)}</span>
+                                </div>
+                            </div>
+                            <span className="text-xs text-gray-400 line-through mt-0.5">¥{(selectedProduct.price * modalQuantity).toFixed(2)}</span>
+                          </>
+                      ) : (
+                          <div className="flex items-baseline gap-1">
+                             <span className="text-2xl font-bold text-gray-900">¥{(selectedProduct.price * modalQuantity).toFixed(2)}</span>
+                          </div>
+                      )}
                    </div>
                    
                    <div className="flex items-center gap-6">
@@ -350,4 +380,3 @@ export const MenuView: React.FC<MenuProps> = ({ cart, onAddToCart, onRemoveFromC
     </div>
   );
 };
-    
