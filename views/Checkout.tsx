@@ -1,22 +1,24 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, MoreHorizontal, ChevronRight, Check, Wallet, X, Ticket } from 'lucide-react';
-import { CartItem, Coupon } from '../types';
+import { CartItem, Coupon, User } from '../types';
 import { api } from '../services/api';
 
 interface CheckoutProps {
   cart: CartItem[];
   onBack: () => void;
   initialDiningMode?: 'dine-in' | 'pickup' | 'delivery';
+  onViewOrder?: (orderId: string) => void;
 }
 
-export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDiningMode = 'dine-in' }) => {
+export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDiningMode = 'dine-in', onViewOrder }) => {
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const [diningMode, setDiningMode] = useState<'dine-in' | 'pickup' | 'delivery'>(initialDiningMode);
   const [paymentMethod, setPaymentMethod] = useState<'wechat' | 'balance'>('wechat');
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [createdOrderId, setCreatedOrderId] = useState<string>('');
+  const [user, setUser] = useState<User | null>(null);
   
   // Coupon state
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -24,6 +26,7 @@ export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDin
   const [showCouponModal, setShowCouponModal] = useState(false);
 
   useEffect(() => {
+    api.getUserProfile().then(setUser);
     api.getCoupons().then(setCoupons);
   }, []);
 
@@ -50,9 +53,12 @@ export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDin
   };
 
   const handleFinish = () => {
-      // In a real app this would clear cart and navigate to orders
-      // Here we just go back to menu or simulate reset
-      window.location.reload(); // Simple reload to reset for demo
+      if (onViewOrder && createdOrderId) {
+          onViewOrder(createdOrderId);
+      } else {
+          // Fallback
+          onBack(); 
+      }
   };
 
   // Valid coupons for current cart
@@ -112,7 +118,7 @@ export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDin
                  <div className="mt-4 border-t border-gray-50 pt-3">
                      <div className="flex justify-between items-center mb-3">
                          <span className="text-sm font-bold text-gray-700">预留电话</span>
-                         <span className="text-sm text-gray-900 font-mono">188****4331</span>
+                         <span className="text-sm text-gray-900 font-mono">{user?.phone || '188****4331'}</span>
                      </div>
                      <div className="flex justify-between items-center">
                          <span className="text-sm font-bold text-gray-700">取餐时间</span>
@@ -260,7 +266,7 @@ export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDin
                        <span className="text-sm font-medium text-gray-900">余额支付</span>
                    </div>
                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-gray-400">余额: ¥0.00</span>
+                      <span className="text-xs text-gray-400">余额: ¥{user?.balance.toFixed(2) || '0.00'}</span>
                        <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-colors ${paymentMethod === 'balance' ? 'bg-[#07C160] border-[#07C160]' : 'border-gray-300 bg-white'}`}>
                           {paymentMethod === 'balance' && <Check size={12} className="text-white" strokeWidth={3} />}
                        </div>
@@ -380,6 +386,14 @@ export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDin
                       <div className="flex justify-between items-center py-2 border-b border-gray-50">
                           <span className="text-sm text-gray-500">支付金额</span>
                           <span className="text-xl font-bold text-gray-900">¥{grandTotal.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1">
+                          <span className="text-xs text-gray-500">下单门店</span>
+                          <span className="text-xs text-gray-700 font-medium">棠小一 (科技园店)</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1">
+                          <span className="text-xs text-gray-500">商品详情</span>
+                          <span className="text-xs text-gray-700">共 {cart.reduce((a,b) => a + b.quantity, 0)} 件商品</span>
                       </div>
                       <div className="flex justify-between items-center py-1">
                           <span className="text-xs text-gray-500">订单编号</span>

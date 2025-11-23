@@ -1,5 +1,5 @@
 
-import { User, Product, Category, Order, Store, OrderStatus, Address, Banner, ApiResponse, PointRecord, Coupon } from '../types';
+import { User, Product, Category, Order, Store, OrderStatus, Address, Banner, ApiResponse, PointRecord, Coupon, CartItem, OrderItem } from '../types';
 
 // --- Configuration ---
 const API_BASE_URL = 'https://api.your-saas-backend.com/api/v1'; // Replace with actual backend URL
@@ -181,7 +181,7 @@ let MOCK_PRODUCTS: Product[] = [
   }
 ];
 
-const MOCK_ORDERS: Order[] = [
+let MOCK_ORDERS: Order[] = [
   {
     id: '3662',
     storeId: 1,
@@ -338,14 +338,48 @@ export const api = {
       return MOCK_ORDERS;
     }
   },
+  
+  getOrder: async (id: string): Promise<Order | null> => {
+      try {
+          return await request<Order>(`/order/${id}`);
+      } catch (e) {
+          await new Promise(r => setTimeout(r, 200));
+          return MOCK_ORDERS.find(o => o.id === id) || null;
+      }
+  },
 
-  createOrder: async (data: { storeId: number, items: any[], type: string }): Promise<{success: boolean, orderId: string}> => {
+  createOrder: async (data: { storeId: number, items: CartItem[], type: 'Dine In' | 'Pick Up' | 'Delivery' }): Promise<{success: boolean, orderId: string}> => {
     try {
       const res = await request<{orderId: string}>('/order/create', { method: 'POST', body: JSON.stringify(data) });
       return { success: true, orderId: res.orderId };
     } catch (e) {
       await new Promise(r => setTimeout(r, 1000));
-      return { success: true, orderId: Math.random().toString().slice(2, 8) };
+      const orderId = Math.floor(Math.random() * 9000 + 1000).toString();
+      
+      const totalAmount = data.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      
+      const newOrder: Order = {
+          id: orderId,
+          storeId: data.storeId,
+          storeName: MOCK_STORES.find(s => s.id === data.storeId)?.name || '棠小一',
+          status: OrderStatus.PENDING, // Starts as pending, payOrder will make it PAID
+          createTime: new Date().toLocaleString('zh-CN', {hour12: false}).replace(/\//g, '-').slice(0, 16),
+          totalAmount: totalAmount,
+          payAmount: totalAmount,
+          discountAmount: 0,
+          type: data.type,
+          items: data.items.map(item => ({
+              productId: item.id,
+              name: item.name,
+              count: item.quantity,
+              price: item.price,
+              image: item.image,
+              specSnapshot: item.selectedSpec ? Object.values(item.selectedSpec).join(' ') : ''
+          }))
+      };
+      
+      MOCK_ORDERS.unshift(newOrder); // Add to beginning
+      return { success: true, orderId };
     }
   },
   
@@ -355,6 +389,10 @@ export const api = {
         return true;
      } catch (e) {
         await new Promise(r => setTimeout(r, 1500));
+        const order = MOCK_ORDERS.find(o => o.id === orderId);
+        if (order) {
+            order.status = OrderStatus.PAID;
+        }
         return true;
      }
   },

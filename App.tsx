@@ -18,6 +18,7 @@ import { ReservationView } from './views/Reservation';
 import { StoreDetailView } from './views/StoreDetail';
 import { MemberCodeView } from './views/MemberCode';
 import { ViewState, CartItem, Product, Order, PointsReward } from './types';
+import { api } from './services/api';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>('HOME');
@@ -50,6 +51,20 @@ const App: React.FC = () => {
   const handleOrderSelect = (order: Order) => {
     setSelectedOrder(order);
     setCurrentView('ORDER_DETAIL');
+  };
+
+  const handleViewCreatedOrder = async (orderId: string) => {
+      // Clear cart
+      setCart([]);
+      
+      // Fetch the order
+      const order = await api.getOrder(orderId);
+      if (order) {
+          setSelectedOrder(order);
+          setCurrentView('ORDER_DETAIL');
+      } else {
+          setCurrentView('ORDERS');
+      }
   };
 
   // Re-order logic: Convert OrderItems to CartItems and go to checkout
@@ -103,7 +118,14 @@ const App: React.FC = () => {
       case 'PROFILE':
         return <ProfileView onNavigate={setCurrentView} />;
       case 'CHECKOUT':
-        return <CheckoutView cart={cart} onBack={() => setCurrentView('MENU')} initialDiningMode={initialDiningMode} />;
+        return (
+            <CheckoutView 
+                cart={cart} 
+                onBack={() => setCurrentView('MENU')} 
+                initialDiningMode={initialDiningMode} 
+                onViewOrder={handleViewCreatedOrder}
+            />
+        );
       case 'ADDRESS_LIST':
         return <AddressListView onBack={() => setCurrentView('PROFILE')} />;
       case 'STORE_LIST':
