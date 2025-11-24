@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { ChevronLeft, Search, MapPin, Navigation, X } from 'lucide-react';
+import { ChevronLeft, Search, MapPin, Navigation, X, ShoppingBag } from 'lucide-react';
 import { Store } from '../types';
 import { api } from '../services/api';
 
@@ -62,7 +62,7 @@ export const StoreListView: React.FC<StoreListProps> = ({ onBack, onSelect }) =>
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
          <div className="text-xs text-gray-500 font-medium ml-1">
             {searchTerm ? `搜索结果 (${filteredStores.length})` : '附近门店'}
          </div>
@@ -70,39 +70,56 @@ export const StoreListView: React.FC<StoreListProps> = ({ onBack, onSelect }) =>
          {filteredStores.length > 0 ? filteredStores.map(store => (
             <div 
               key={store.id} 
-              onClick={() => onSelect(store)}
-              className={`bg-white p-4 rounded-xl shadow-sm border-2 transition-all cursor-pointer ${store.status === 'OPEN' ? 'border-transparent hover:border-[#FDE047]' : 'border-transparent opacity-70 grayscale'}`}
+              onClick={() => store.status === 'OPEN' && onSelect(store)}
+              className={`bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden ${store.status === 'CLOSED' ? 'opacity-75' : ''}`}
             >
-                <div className="flex gap-3">
-                    <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                       <img src={store.image} className="w-full h-full object-cover" alt={store.name} />
+                <div className="flex gap-4">
+                    {/* Image Preview */}
+                    <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative shadow-inner">
+                       <img src={store.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={store.name} />
+                       {store.status === 'CLOSED' && (
+                           <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs font-bold backdrop-blur-[1px]">
+                               休息中
+                           </div>
+                       )}
                     </div>
-                    <div className="flex-1">
-                       <div className="flex justify-between items-start">
-                          <h3 className="font-bold text-gray-900 text-sm mb-1">{store.name}</h3>
-                          <span className="text-xs text-gray-500">{store.distance}</span>
-                       </div>
-                       <p className="text-xs text-gray-500 mb-2 line-clamp-1">{store.address}</p>
-                       <div className="flex gap-1 flex-wrap">
-                          {store.tags.map(tag => (
-                             <span key={tag} className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">{tag}</span>
-                          ))}
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded border ${store.status === 'OPEN' ? 'text-green-600 border-green-200 bg-green-50' : 'text-gray-400 border-gray-200'}`}>
-                             {store.status === 'OPEN' ? '营业中' : '休息中'}
-                          </span>
+                    
+                    {/* Content */}
+                    <div className="flex-1 flex flex-col justify-between">
+                       <div>
+                           <div className="flex justify-between items-start">
+                              <h3 className="font-bold text-gray-900 text-base leading-tight mb-1">{store.name}</h3>
+                              <span className="text-xs text-gray-500 font-medium bg-gray-50 px-1.5 py-0.5 rounded flex-shrink-0 ml-2">{store.distance}</span>
+                           </div>
+                           <p className="text-xs text-gray-500 line-clamp-1 mb-2">{store.address}</p>
+                           <div className="flex gap-1.5 flex-wrap">
+                              {store.tags.map(tag => (
+                                 <span key={tag} className="text-[10px] bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded border border-orange-100">{tag}</span>
+                              ))}
+                           </div>
                        </div>
                     </div>
                 </div>
-                <div className="mt-3 pt-3 border-t border-gray-50 flex justify-between items-center">
-                   <div className="flex gap-4">
-                      <button 
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-xs font-medium text-gray-600 flex items-center gap-1 hover:text-gray-900"
-                      >
-                          <Navigation size={12} /> 导航
-                      </button>
-                   </div>
-                   <button className="bg-[#FDE047] text-gray-900 text-xs font-bold px-4 py-1.5 rounded-full hover:bg-yellow-400 transition-colors">去点单</button>
+
+                {/* Actions Footer */}
+                <div className="mt-4 flex items-center gap-3">
+                   <button 
+                     onClick={(e) => { e.stopPropagation(); /* Nav logic */ }}
+                     className="flex-1 flex items-center justify-center gap-1 py-2.5 rounded-lg bg-gray-50 text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors"
+                   >
+                       <Navigation size={14} /> 导航
+                   </button>
+                   <button 
+                     disabled={store.status !== 'OPEN'}
+                     className={`flex-[2] flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-bold shadow-sm transition-colors ${
+                         store.status === 'OPEN' 
+                         ? 'bg-[#FDE047] text-gray-900 hover:bg-yellow-400 active:scale-[0.98]' 
+                         : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                     }`}
+                   >
+                       <ShoppingBag size={14} strokeWidth={2.5} /> 
+                       {store.status === 'OPEN' ? '去点单' : '休息中'}
+                   </button>
                 </div>
             </div>
          )) : (

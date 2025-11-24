@@ -1,8 +1,8 @@
-
 import React, { useEffect, useState } from 'react';
-import { ChevronLeft, Plus, Edit3, Trash2 } from 'lucide-react';
+import { Plus, Edit3 } from 'lucide-react';
 import { Address } from '../types';
 import { api } from '../services/api';
+import { Header } from '../components/Header';
 
 interface AddressListProps {
   onBack: () => void;
@@ -17,12 +17,7 @@ export const AddressListView: React.FC<AddressListProps> = ({ onBack }) => {
 
   return (
     <div className="min-h-screen bg-[#F3F4F6] flex flex-col">
-      {/* Header */}
-      <div className="bg-white px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
-         <button onClick={onBack} className="p-1 -ml-1 rounded-full hover:bg-gray-100"><ChevronLeft size={24} /></button>
-         <span className="font-bold text-lg text-gray-900">我的地址</span>
-         <div className="w-8"></div> {/* Spacer */}
-      </div>
+      <Header title="我的地址" onBack={onBack} />
 
       {/* List */}
       <div className="p-4 space-y-3 flex-1 overflow-y-auto">

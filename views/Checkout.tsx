@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, MoreHorizontal, ChevronRight, Check, Wallet, X, Ticket } from 'lucide-react';
+import { ChevronRight, MoreHorizontal, Check, Wallet, X } from 'lucide-react';
 import { CartItem, Coupon, User } from '../types';
 import { api } from '../services/api';
+import { Header } from '../components/Header';
 
 interface CheckoutProps {
   cart: CartItem[];
@@ -132,14 +132,13 @@ export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDin
 
   return (
     <div className="min-h-screen bg-[#F3F4F6] flex flex-col font-sans">
-      {/* Header */}
-      <div className="bg-white px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
-         <button onClick={onBack} className="p-1 -ml-1 rounded-full hover:bg-gray-100"><ChevronLeft size={24} /></button>
-         <span className="font-bold text-lg text-gray-900">确认订单</span>
-         <div className="flex gap-2">
-            <button className="p-1 rounded-full hover:bg-gray-100"><MoreHorizontal size={24} /></button>
-         </div>
-      </div>
+      <Header 
+        title="确认订单" 
+        onBack={onBack} 
+        rightElement={
+          <button className="p-1 rounded-full hover:bg-gray-100"><MoreHorizontal size={24} /></button>
+        }
+      />
 
       <div className="flex-1 overflow-y-auto pb-32">
           {/* Dining Mode Toggle */}
@@ -162,7 +161,7 @@ export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDin
                   {cart.map((item, idx) => (
                     <div key={idx} className="flex gap-3">
                         <div className="relative w-16 h-16 flex-shrink-0">
-                          <img src={item.image} className="w-full h-full rounded-lg object-cover bg-gray-100" />
+                          <img src={item.image} className="w-full h-full rounded-lg object-cover bg-gray-100" alt={item.name} />
                         </div>
                         <div className="flex-1 flex flex-col justify-between py-0.5">
                           <div className="flex justify-between items-start">
@@ -274,22 +273,6 @@ export const CheckoutView: React.FC<CheckoutProps> = ({ cart, onBack, initialDin
                 </div>
             </div>
           </div>
-      </div>
-
-      {/* Bottom Bar */}
-      <div className="bg-white border-t border-gray-100 px-4 py-3 pb-safe sticky bottom-0 z-20 flex items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-         <div className="flex items-baseline gap-1">
-             <span className="text-sm font-medium text-gray-900">合计</span>
-             <span className="text-2xl font-bold text-gray-900">¥{grandTotal.toFixed(2)}</span>
-             {discountAmount > 0 && <span className="text-xs text-gray-400 line-through ml-1">¥{(grandTotal + discountAmount).toFixed(2)}</span>}
-         </div>
-         <button 
-            onClick={handlePay}
-            disabled={isPaymentProcessing}
-            className={`bg-[#FDE047] text-gray-900 px-8 py-3 rounded-full font-bold text-sm shadow-sm transition-all active:scale-[0.98] ${isPaymentProcessing ? 'opacity-70 cursor-wait' : 'hover:bg-yellow-400'}`}
-         >
-            {isPaymentProcessing ? '支付中...' : '确认支付'}
-         </button>
       </div>
 
       {/* Coupon Selection Modal */}

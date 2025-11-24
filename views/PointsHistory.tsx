@@ -1,8 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
-import { ChevronLeft } from 'lucide-react';
 import { PointRecord } from '../types';
 import { api } from '../services/api';
+import { Header } from '../components/Header';
 
 interface PointsHistoryProps {
   onBack: () => void;
@@ -21,12 +20,7 @@ export const PointsHistoryView: React.FC<PointsHistoryProps> = ({ onBack }) => {
 
   return (
     <div className="min-h-screen bg-[#F3F4F6] flex flex-col">
-      {/* Header */}
-      <div className="bg-white px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
-         <button onClick={onBack} className="p-1 -ml-1 rounded-full hover:bg-gray-100"><ChevronLeft size={24} /></button>
-         <span className="font-bold text-lg text-gray-900">积分明细</span>
-         <div className="w-8"></div>
-      </div>
+      <Header title="积分明细" onBack={onBack} />
 
       {/* List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">

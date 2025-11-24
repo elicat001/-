@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { User, QrCode, ChevronRight, CreditCard, Gift, MapPin, Headphones, ShoppingBag, FileText, UserCircle } from 'lucide-react';
+import { User, QrCode, ChevronRight, CreditCard, Gift, MapPin, Headphones, ShoppingBag, FileText, UserCircle, Phone, Clock, X } from 'lucide-react';
 import { api } from '../services/api';
 import { User as UserType, ViewState } from '../types';
 
@@ -10,6 +10,7 @@ interface ProfileProps {
 
 export const ProfileView: React.FC<ProfileProps> = ({ onNavigate }) => {
   const [user, setUser] = useState<UserType | null>(null);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   useEffect(() => {
     api.getUserProfile().then(setUser);
@@ -18,7 +19,7 @@ export const ProfileView: React.FC<ProfileProps> = ({ onNavigate }) => {
   const menuItems = [
      { icon: FileText, label: '订单中心', action: () => onNavigate('ORDERS') },
      { icon: UserCircle, label: '个人信息', action: () => onNavigate('USER_PROFILE') },
-     { icon: Headphones, label: '客服中心', action: () => {} },
+     { icon: Headphones, label: '客服中心', action: () => setShowHelpModal(true) },
      { icon: MapPin, label: '我的地址', action: () => onNavigate('ADDRESS_LIST') }
   ];
 
@@ -109,6 +110,52 @@ export const ProfileView: React.FC<ProfileProps> = ({ onNavigate }) => {
       <div className="mt-8 text-center">
           <p className="text-[10px] text-gray-300">v1.0.0</p>
       </div>
+
+      {/* Help Modal */}
+      {showHelpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white w-full max-w-sm rounded-2xl p-6 animate-in zoom-in duration-200 relative shadow-xl">
+                <button 
+                    onClick={() => setShowHelpModal(false)}
+                    className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full p-1"
+                >
+                    <X size={20} />
+                </button>
+                
+                <h3 className="text-lg font-bold text-gray-900 mb-6 text-center">联系客服</h3>
+                
+                <div className="space-y-4">
+                    <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                        <div className="bg-white p-2 rounded-full shadow-sm text-gray-900 border border-gray-100">
+                            <Phone size={20} />
+                        </div>
+                        <div>
+                            <div className="text-sm font-bold text-gray-900">客服电话</div>
+                            <div className="text-lg font-bold text-[#D97706] mt-1">400-888-9999</div>
+                            <div className="text-xs text-gray-400 mt-1">点击即可拨打</div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                        <div className="bg-white p-2 rounded-full shadow-sm text-gray-900 border border-gray-100">
+                            <Clock size={20} />
+                        </div>
+                        <div>
+                            <div className="text-sm font-bold text-gray-900">服务时间</div>
+                            <div className="text-sm text-gray-600 mt-1">周一至周日 09:00 - 22:00</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button 
+                    onClick={() => setShowHelpModal(false)}
+                    className="w-full bg-[#FDE047] text-gray-900 font-bold py-3 rounded-xl shadow-sm hover:bg-yellow-400 mt-6 transition-colors"
+                >
+                    关闭
+                </button>
+            </div>
+        </div>
+      )}
     </div>
   );
 };

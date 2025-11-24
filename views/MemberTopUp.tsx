@@ -1,6 +1,6 @@
-
 import React, { useState } from 'react';
-import { ChevronLeft, Wallet, CheckCircle, Gift, Crown, Coffee, Percent } from 'lucide-react';
+import { Wallet, CheckCircle, Gift, Crown, Coffee, Percent } from 'lucide-react';
+import { Header } from '../components/Header';
 
 interface MemberTopUpProps {
   onBack: () => void;
@@ -44,12 +44,7 @@ export const MemberTopUpView: React.FC<MemberTopUpProps> = ({ onBack }) => {
 
   return (
     <div className="min-h-screen bg-[#F3F4F6] flex flex-col">
-      {/* Header */}
-      <div className="bg-[#1F2937] text-white px-4 py-3 flex items-center justify-between sticky top-0 z-20">
-         <button onClick={onBack} className="p-1 -ml-1 rounded-full hover:bg-gray-700 transition-colors"><ChevronLeft size={24} /></button>
-         <span className="font-bold text-lg">会员储值</span>
-         <div className="w-8"></div>
-      </div>
+      <Header title="会员储值" onBack={onBack} theme="dark" />
 
       <div className="flex-1 overflow-y-auto pb-safe">
           {/* Balance Card */}

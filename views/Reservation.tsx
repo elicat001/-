@@ -1,6 +1,6 @@
-
 import React, { useState } from 'react';
-import { ChevronLeft, Calendar, Clock, Users, Phone } from 'lucide-react';
+import { Calendar, Clock, Users, Phone } from 'lucide-react';
+import { Header } from '../components/Header';
 
 interface ReservationProps {
   onBack: () => void;
@@ -23,12 +23,7 @@ export const ReservationView: React.FC<ReservationProps> = ({ onBack }) => {
 
   return (
     <div className="min-h-screen bg-[#F3F4F6] flex flex-col">
-      {/* Header */}
-      <div className="bg-white px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
-         <button onClick={onBack} className="p-1 -ml-1 rounded-full hover:bg-gray-100"><ChevronLeft size={24} /></button>
-         <span className="font-bold text-lg text-gray-900">自助预约</span>
-         <div className="w-8"></div>
-      </div>
+      <Header title="自助预约" onBack={onBack} />
 
       <div className="p-4 flex-1 overflow-y-auto">
          <div className="bg-white rounded-xl p-6 shadow-sm mb-4">

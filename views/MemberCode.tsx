@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, RefreshCw, Wallet, CreditCard, HelpCircle } from 'lucide-react';
+import { RefreshCw, Wallet, CreditCard, HelpCircle } from 'lucide-react';
 import { User } from '../types';
 import { api } from '../services/api';
+import { Header } from '../components/Header';
 
 interface MemberCodeProps {
   onBack: () => void;
@@ -40,12 +40,14 @@ export const MemberCodeView: React.FC<MemberCodeProps> = ({ onBack, onTopUp }) =
 
   return (
     <div className="min-h-screen bg-[#1F2937] flex flex-col text-white">
-      {/* Header */}
-      <div className="px-4 py-3 flex items-center justify-between">
-         <button onClick={onBack} className="p-1 -ml-1 rounded-full hover:bg-white/10"><ChevronLeft size={24} /></button>
-         <span className="font-bold text-lg">会员码</span>
-         <button className="text-xs text-gray-300 hover:text-white">使用帮助</button>
-      </div>
+      <Header 
+        title="会员码" 
+        onBack={onBack} 
+        theme="dark"
+        rightElement={
+          <button className="text-xs text-gray-300 hover:text-white transition-colors">使用帮助</button>
+        }
+      />
 
       <div className="flex-1 px-4 pt-4 flex flex-col items-center">
           {/* Card */}
@@ -55,7 +57,7 @@ export const MemberCodeView: React.FC<MemberCodeProps> = ({ onBack, onTopUp }) =
               {/* User Info */}
               <div className="flex items-center justify-between mb-6">
                  <div className="flex items-center gap-3">
-                    <img src={user.avatar} className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200" />
+                    <img src={user.avatar} className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200" alt="avatar" />
                     <div>
                         <div className="font-bold text-lg leading-none">{user.name}</div>
                         <div className="text-xs text-gray-400 mt-1">普通会员</div>
